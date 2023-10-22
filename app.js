@@ -7,6 +7,7 @@ const Authentication = require('./middleware/UserAuth')
 const AdminAuth = require('./middleware/AdminAuth')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const cron = require('node-cron')
 const User = require('./models/User')
 const Note = require('./models/Note')
 const Admin = require('./models/Admin')
@@ -300,6 +301,38 @@ app.post('/admin/login', async (req, res) => {
     }
     catch (error) {
         res.status(500).json({ message: error.message })
+    }
+})
+
+// Send notification to all users
+app.post('/admin/send', AdminAuth, async (req, res) => {
+    try {
+        const { title, content } = req.body
+        const users = await User.find()
+        users.forEach(async (user) => {
+            const newNote = await Note({
+                title: title,
+                content: content,
+                user: user._id,
+            })
+            user.notes.push(newNote._id)
+            await newNote.save();
+            await user.save();
+        })
+        res.json({ message: "Notification sent successfully" })
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+})
+
+// Schedule for every 2 hours
+cron.schedule('0 */2 * * *', async () => {
+    try {
+        console.log('Notiify Server Running...');
+    }
+    catch (error) {
+        console.log(error.message);
     }
 })
 
