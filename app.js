@@ -66,12 +66,12 @@ app.post('/user/login', async (req, res) => {
     try {
         const { mailid, password } = req.body
 
-        // Check if user exists
-        const user = await User.findOne({ mailid: mailid })
-
         if (!mailid || !password) {
             return res.status(400).json({ message: "Please enter all fields" })
         }
+
+        // Check if user exists
+        const user = await User.findOne({ mailid: mailid })
 
         if (!user) {
             return res.status(400).json({ message: "User does not exist" })
