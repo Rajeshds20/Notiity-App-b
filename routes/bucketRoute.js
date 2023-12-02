@@ -14,7 +14,7 @@ async function codeGenerate() {
 // Create new bucket
 router.post('/create', async (req, res) => {
     try {
-        const { data } = req.body;
+        const { data, title } = req.body;
         if (!data) {
             return res.status(400).json({ message: "Please Include the data" })
         }
@@ -23,11 +23,12 @@ router.post('/create', async (req, res) => {
         const code = await codeGenerate();
 
         const newBucket = await Bucket({
+            title,
             code,
             content: data,
         })
         newBucket.save()
-        res.json({ message: "Bucket Created Successfully", newBucket })
+        res.json({ message: "Bucket Created Successfully", bucket: newBucket })
     }
     catch (error) {
         res.status(500).json({ message: error.message })
